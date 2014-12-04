@@ -354,10 +354,11 @@ var coordinates = [[0.5,0.07],
         return "translate(" + (cart[0]) + "," + (cart[1]) + ")"; })
       .on('mouseover', function(d){
         d3.select(this).select("text.name").style({opacity:'1.0'});
-        d3.select(this).select("circle").style({opacity:'1.0'});
+        d3.select(this).select("circle").style({fill:'white'});
       })
       .on('mouseout', function(d){
-        d3.select(this).select("text.name").style({opacity:'0.3'});
+        d3.select(this).select("text.name").style({opacity:'0.1'});
+        d3.select(this).select("circle").style({fill:'black'});
       })
     
       
