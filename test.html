@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100%" height="100%" viewBox="0 0 1000 700" onload="window.setTimeout('createTextFlows()',100)">
+    <title>Demonstration of FlowText</title>
+	<script type="text/ecmascript" xlink:href="../resources/helper_functions.js" />
+	<script type="text/ecmascript" xlink:href="textFlow.js" />
+		<script type="text/ecmascript">
+			<![CDATA[
+				function createTextFlows() {
+					var myFlowText = "SVG is a language for describing two-dimensional graphics and graphical applications in XML. SVG 1.1 is a W3C Recommendation and forms the core of the current SVG developments. SVG 1.2 is the specification currently being developed as is available in draft form (comments welcome). The SVG Mobile Profiles: SVG Basic and SVG Tiny are targeted to resource-limited devices and are part of the 3GPP platform for third generation mobile phones. SVG Print is a set of guidelines to produce final-form documents in XML suitable for archiving and printing.";
+					//left aligned text
+					var textNodeLeftAligned = document.createElementNS(svgNS,"text");
+					textNodeLeftAligned.setAttributeNS(null,"x",55);
+					textNodeLeftAligned.setAttributeNS(null,"y",65);
+					textNodeLeftAligned.setAttributeNS(null,"font-size",10);
+					textNodeLeftAligned.setAttributeNS(null,"font-family","Arial,Helvetica");
+					document.documentElement.appendChild(textNodeLeftAligned);
+					var dy = textFlow(myFlowText,textNodeLeftAligned,290,55,15,false);
+					//right aligned text
+					var textNodeRightAligned = document.createElementNS(svgNS,"text");
+					textNodeRightAligned.setAttributeNS(null,"x",595);
+					textNodeRightAligned.setAttributeNS(null,"y",45);
+					textNodeRightAligned.setAttributeNS(null,"font-size",10);
+					textNodeRightAligned.setAttributeNS(null,"font-family","Arial,Helvetica");
+					textNodeRightAligned.setAttributeNS(null,"text-anchor","end");
+					document.documentElement.appendChild(textNodeRightAligned);
+					var dy = textFlow(myFlowText,textNodeRightAligned,190,595,15,false);
+					//centered text
+					var textNodeCentered = document.createElementNS(svgNS,"text");
+					textNodeCentered.setAttributeNS(null,"x",750);
+					textNodeCentered.setAttributeNS(null,"y",65);
+					textNodeCentered.setAttributeNS(null,"font-size",10);
+					textNodeCentered.setAttributeNS(null,"font-family","Arial,Helvetica");
+					textNodeCentered.setAttributeNS(null,"text-anchor","middle");
+					document.documentElement.appendChild(textNodeCentered);
+					var dy = textFlow(myFlowText,textNodeCentered,190,750,15,false);
+					//justified text
+					var textNodeJustified = document.createElementNS(svgNS,"text");
+					textNodeJustified.setAttributeNS(null,"x",355);
+					textNodeJustified.setAttributeNS(null,"y",415);
+					textNodeJustified.setAttributeNS(null,"font-size",10);
+					textNodeJustified.setAttributeNS(null,"font-family","Arial,Helvetica");
+					document.documentElement.appendChild(textNodeJustified);
+					var dy = textFlow(myFlowText,textNodeJustified,290,355,15,true);
+				}
+			]]>
+		</script>
+    <rect fill="salmon" stroke="none" x="50" y="50" width="300" height="200" />
+	<rect fill="aliceblue" stroke="none" x="400" y="30" width="200" height="300" />
+    <rect fill="papayawhip" stroke="none" x="650" y="50" width="200" height="300" />
+    <rect fill="paleturquoise" stroke="none" x="350" y="400" width="300" height="200" />
+	<g font-size="15"  font-family="Arial,Helvetica">
+		<text x="55" y="240">text-anchor="start"</text>
+		<text x="595" y="320" text-anchor="end">text-anchor="end"</text>
+		<text x="750" y="340" text-anchor="middle">text-anchor="middle"</text>
+		<text x="355" y="590">text-anchor left, justified option set to true</text>
+	</g>
+</svg>

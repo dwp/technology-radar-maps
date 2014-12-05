@@ -4,6 +4,8 @@
 <html>
 <head>
 <script src="d3.js"  charset="utf-8"></script>
+<script type="text/ecmascript" xlink:href="helper_functions.js" />
+<script type="text/ecmascript" xlink:href="textFlow.js" />
 <script src="radar.js"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>Technology Radar Map</title>
@@ -64,6 +66,10 @@ svg text.big {
 	text-align: center;
 }
 
+table {
+	page-break-before: always;
+}
+
 @media print {
 svg text.name { font-family: Arial, Sans-serif; font-size: 12px; opacity: 0.8 }
 
@@ -72,9 +78,14 @@ svg text.name { font-family: Arial, Sans-serif; font-size: 12px; opacity: 0.8 }
 </style>
 </head>
 <body>
-<h1>Technology Radar Map</h1>
+<h1 id="realtitle">Technology Radar Map</h1>
 
-<center><p><input type="file" name="xlfile" id="xlf" />Click here to select a file</p></center>
+<center><div id="admin">
+	<p>Title: <input type="text" name="title" id="title" />
+	<br />
+	<input type="file" name="xlfile" id="xlf" />Click here to select a file
+</p></div>
+</center>
 <pre id="outter" style="display:none"></pre>
 <center><table width='300px'>
 	<tr>
@@ -89,7 +100,7 @@ svg text.name { font-family: Arial, Sans-serif; font-size: 12px; opacity: 0.8 }
 	</tr>
 </table></center>
 
-<center><div id="radar" style="width: 1024px; height: 1024px;"></div></center>
+<center><div id="radar" style="width: 1664px; height: 1664px;"></div></center>
 <script>
 
 function entry(start, end, quadrant, superquad, position, position_angle, status, stage) {
@@ -257,8 +268,8 @@ var jsonoutput = 'radar("#radar",'  + "\n" +
 '{ horizons: [ "decommision", "sunset", "deploy", "trial", "assess","subcategory","maincategory" ],'  + "\n" +
 	'quadrants: [' + jsonquadrantsstring + '],'  + "\n" +
 	'sub_quadrants : { ' + jsonsubquadrantsstring + ' },'  + "\n" +
-	'width: 1024,'  + "\n" +
-	'height: 1024, '  + "\n" +
+	'width: 1664,'  + "\n" +
+	'height: 1664, '  + "\n" +
 	'data: [' +
 			jsondata;
 
@@ -269,6 +280,8 @@ console.log(jsonoutput);
 	
 
 document.getElementById("jsonscript").innerHTML = jsonoutput;
+document.getElementById("realtitle").innerHTML = document.getElementById("title").value;
+document.getElementById("admin").style.display = "none";
 
 	    
 }

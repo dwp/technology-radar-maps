@@ -330,7 +330,7 @@ function radar(id, data) {
           }
 
 var coordinates = [[0.5,0.07],
-                  [0.3,0.7,0.07,0.07],
+                  [0.3,0.7,0.042,0.098],
                   [0.25,0.5,0.75,0.035,0.105,0.07],
                   [0.2,0.4,0.6,0.8,0.035,0.105,0.035,0.105],
                   [0.25,0.75,0.5,0.25,0.75,0.035,0.035,0.07,0.105,0.105],
@@ -339,7 +339,7 @@ var coordinates = [[0.5,0.07],
                   [0.1706,0.8294,0.5,0.2589,0.7411,0.5,0.1706,0.8294,0.0238,0.0238,0.0362,0.07,0.07,0.1037,0.1161,0.1161],
                   [0.25,0.5,0.75,0.25,0.5,0.75,0.25,0.5,0.75,0.035,0.035,0.035,0.07,0.07,0.07,0.105,0.105,0.105],
                   [0.4446,0.7409,0.1483,0.5553,0.8517,0.1483,0.3674,0.8517,0.1483,0.5865,0.0207,0.0207,0.0218,0.0592,0.0592,0.0635,0.0913,0.1007,0.1192,0.1192],
-                  [0.25,0.5,0.75,0.33,0.66,0.25,0.5,0.75,0.33,0.66,0.25,0.2,0.2,0.2,0.4,0.4,0.6,0.6,0.6,0.8,0.8]
+                  [0.25,0.5,0.75,0.33,0.66,0.25,0.5,0.75,0.33,0.66,0.25,0.028,0.028,0.028,0.056,0.056,0.084,0.084,0.084,0.112,0.112]
                   ];
 
 
@@ -361,12 +361,13 @@ var coordinates = [[0.5,0.07],
       .on('mouseout', function(d){
         d3.select(this).select("text.name").style({opacity:'0.1'});
         d3.select(this).select("circle").style({fill:'black'});
+        if (d.status == '1') return d3.select(this).select("circle").style({fill:'grey'})
       })
     
       
     blips.append('circle')
     .attr('r', '4px')
-    .attr('fill', function(d) { if (d.status == '1') return "red"; if (d.status == null) return "black"; if (d.status == '0') return "black"; })
+    .attr('fill', function(d) { if (d.status == '1') return "grey"; if (d.status == null) return "black"; if (d.status == '0') return "black"; })
     ;
     
     blips.append("text")
@@ -377,13 +378,14 @@ var coordinates = [[0.5,0.07],
 
     // add the lists
     var table = d3.select(id).append('table');
-
     table.selectAll('tr')
       .data(blip_data)
       .enter()
       
       .append('tr')
-      .html(function(d) { return "<td>" + d.superquad + "</td><td>" + d.quadrant + "</td><td>" + d.name +"</td>"; });
+      .html(function(d) { 
+        var cellcolour = ["#D62728","#FF7F0E","#2CA02C","#E377C2","#1F77B4"];
+        return "<td>" + d.superquad + "</td><td>" + d.quadrant + "</td><td bgcolor=" + cellcolour[d.stage - 1] + " style='opacity:0.5'>" + d.name + d.stage + "</td>"; });
 
     
   }  
