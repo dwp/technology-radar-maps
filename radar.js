@@ -117,6 +117,7 @@ function radar(id, data) {
       return 'quadrant quadarant-' + d.name.toLowerCase().replace(/ /, '-');
     }
 
+
     quadrants.selectAll('line.quadrant')
       .data(sub_quadrants, identity)
       .enter().append('line')
@@ -162,19 +163,32 @@ function radar(id, data) {
     }
     var text_angle = (360 / sub_quadrants.length);
 
+
     quadrants.selectAll('text.quadrant')
       .data(quads.filter(function(d) { return d.horizon == 0; }))
       .enter()
       .append('text')
       .attr('class','quadrant wrapping')
-      .attr('dy', function(d) { if (d.quadrant * text_angle < 180) return horizonWidth / 7 * 6 - 30; else return 0-horizonWidth / 7 * 6 + 30; } )
+      //.attr('dy', function(d) { if (d.quadrant * text_angle < 180) return horizonWidth / 7 * 6 - 30; else return 0-horizonWidth / 7 * 6 + 30; } )
       .attr('text-anchor', 'middle')
       .attr('transform', function(d) { if (d.quadrant * text_angle < 180) 
         return 'rotate(' + (-90 + d.quadrant * text_angle + (text_angle/2) )+ ')' ; 
         else return 'rotate(' + (90 + d.quadrant * text_angle + (text_angle/2) )+ ')'; } )
 
 
-      .text(function(d) { return d.name; })
+      //.text(function(d) { return d.name; })
+      .html(function(d) {
+        var words = d.name.split(" ");
+        var wordcount = words.length;
+        var sentence = "";
+        var dy = "";
+        for (i = 0; i < words.length; i++) { 
+          if (d.quadrant * text_angle < 180) dy = horizonWidth / 7 * 6 - 50; else dy = 0-horizonWidth / 7 * 6 + 30;
+          dy = dy + (10 * i);
+          sentence += "<tspan text-anchor='middle' x=0 y=" + dy + ">" + words[i] + "</tspan>";
+        }
+        return sentence;
+      });
 
 //Main Quadrant
     quadrants.selectAll('line.quadrant')
