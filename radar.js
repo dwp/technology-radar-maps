@@ -191,50 +191,52 @@ function radar(id, data) {
       });
 
 //Main Quadrant
-    quadrants.selectAll('line.quadrant')
-      .data(data.quadrants, identity)
-      .enter().append('line')
-      .attr('x1', 0)
-      .attr('y1', 0)
-      .attr('stroke-width', '2px')
-      .attr('x2', function(d,i) {
+    if(data.quadrants.length > 1) {
+      quadrants.selectAll('line.quadrant')
+        .data(data.quadrants, identity)
+        .enter().append('line')
+        .attr('x1', 0)
+        .attr('y1', 0)
+        .attr('stroke-width', '2px')
+        .attr('x2', function(d,i) {
 
-        var ctr = 0;
-        var subquads = 0;
+          var ctr = 0;
+          var subquads = 0;
 
-        for (var sq in data.sub_quadrants)
-        {
-          if(sq != d)
+          for (var sq in data.sub_quadrants)
           {
-            subquads = subquads + data.sub_quadrants[sq].length;
+            if(sq != d)
+            {
+              subquads = subquads + data.sub_quadrants[sq].length;
 
-          }else { break;}
-        }
-        
-        subquads = subquads + data.sub_quadrants[d].length;
+            }else { break;}
+          }
+          
+          subquads = subquads + data.sub_quadrants[d].length;
 
-        return (Math.cos(quad_angle * subquads) * horizonWidth);
-      })
-      .attr('y2',  function(d,i) {
-        var ctr = 0;
-        var subquads = 0;
+          return (Math.cos(quad_angle * subquads) * horizonWidth);
+        })
+        .attr('y2',  function(d,i) {
+          var ctr = 0;
+          var subquads = 0;
 
-        for (var sq in data.sub_quadrants)
-        {
-          if(sq != d)
+          for (var sq in data.sub_quadrants)
           {
-            subquads = subquads + data.sub_quadrants[sq].length;
+            if(sq != d)
+            {
+              subquads = subquads + data.sub_quadrants[sq].length;
 
-          }else { break;}
-        }
-        
-        subquads = subquads + data.sub_quadrants[d].length;
-        return (Math.sin(quad_angle * subquads) * horizonWidth);
-      })
-      //.attr('class', quadrant_class)
-      .attr('stroke', function(d,i) {
-        return d3.rgb(0,0,0);
-      });
+            }else { break;}
+          }
+          
+          subquads = subquads + data.sub_quadrants[d].length;
+          return (Math.sin(quad_angle * subquads) * horizonWidth);
+        })
+        //.attr('class', quadrant_class)
+        .attr('stroke', function(d,i) {
+          return d3.rgb(0,0,0);
+        });
+      }
 
 
     quadrants.selectAll('text.quadrant')
@@ -302,22 +304,22 @@ function radar(id, data) {
     add_quadrants(base);
     
     var blip_data = process_radar_data(data);
-    blip_data.sort(
-      function (a,b) {
-        if (a.superquad < b.superquad)
-          return -1;
-        if (a.superquad > b.superquad)
-          return 1;
-        if (a.quadrant < b.quadrant)
-          return -1;
-        if (a.quadrant > b.quadrant)
-          return 1;
-        if (a.name < b.name)
-          return -1;
-        if (a.name > b.name)
-          return 1;
-        return 0;
-      });
+    // blip_data.sort(
+    //   function (a,b) {
+    //     if (a.superquad < b.superquad)
+    //       return -1;
+    //     if (a.superquad > b.superquad)
+    //       return 1;
+    //     if (a.quadrant < b.quadrant)
+    //       return -1;
+    //     if (a.quadrant > b.quadrant)
+    //       return 1;
+    //     if (a.name < b.name)
+    //       return -1;
+    //     if (a.name > b.name)
+    //       return 1;
+    //     return 0;
+    //   });
 
         
 
@@ -392,6 +394,7 @@ var coordinates = [[0.5,0.07],
 
     // add the lists
     var table = d3.select(id).append('table');
+    table.attr("style", "page-break-before : always;");    
     table.selectAll('tr')
       .data(blip_data)
       .enter()
