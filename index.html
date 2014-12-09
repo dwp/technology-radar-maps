@@ -6,7 +6,7 @@
 <script src="d3.js"  charset="utf-8"></script>
 <script src="radar.js"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>Technology Radar Map</title>
+<title id="title">Technology Radar Map</title>
 <style>
 
 body {
@@ -64,10 +64,6 @@ svg text.big {
 	text-align: center;
 }
 
-table {
-	page-break-before: always;
-}
-
 @media print {
 svg text.name { font-family: Arial, Sans-serif; font-size: 12px; opacity: 0.8 }
 
@@ -76,14 +72,15 @@ svg text.name { font-family: Arial, Sans-serif; font-size: 12px; opacity: 0.8 }
 </style>
 </head>
 <body>
-<h1 id="realtitle">Technology Radar Map</h1>
-
-<center><div id="admin">
-	<p>Title: <input type="text" name="title" id="title" />
-	<br />
-	<input type="file" name="xlfile" id="xlf" />Click here to select a file
-</p></div>
+	<center>
+	<h2 id="realtitle">Technology Radar Map</h2>
+	<h1 id="maptitle"></h1>
+	<div id="admin">
+		<p>Title: <input type="text" name="titletext" id="titletext" /></p>
+		Select a file: <input type="file" name="xlfile" id="xlf"/>
+	</div>
 </center>
+
 <pre id="outter" style="display:none"></pre>
 <center><table width='300px'>
 	<tr>
@@ -276,9 +273,9 @@ jsonoutput +=']});';
 
 console.log(jsonoutput);
 	
-
 document.getElementById("jsonscript").innerHTML = jsonoutput;
-document.getElementById("realtitle").innerHTML = document.getElementById("title").value;
+document.getElementById("maptitle").innerHTML = document.getElementById("titletext").value;
+document.getElementById("title").innerHTML = document.getElementById("titletext").value;
 document.getElementById("admin").style.display = "none";
 
 	    
