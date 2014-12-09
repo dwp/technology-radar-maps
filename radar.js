@@ -377,6 +377,9 @@ var coordinates = [[0.5,0.07],
         d3.select(this).select("circle").style({fill:'black'});
         if (d.status == '1') return d3.select(this).select("circle").style({fill:'grey'})
       })
+      .on('dblclick', function(d){
+        d3.select(this).select("circle").style({fill:'white'});
+      })      
     
       
     blips.append('circle')
