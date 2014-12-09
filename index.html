@@ -74,7 +74,6 @@ svg text.name { font-family: Arial, Sans-serif; font-size: 12px; opacity: 0.8 }
 <body>
 	<center>
 	<h2 id="realtitle">Technology Radar Map</h2>
-	<h1 id="maptitle"></h1>
 	<div id="admin">
 		<p>Title: <input type="text" name="titletext" id="titletext" /></p>
 		Select a file: <input type="file" name="xlfile" id="xlf"/>
@@ -274,8 +273,7 @@ jsonoutput +=']});';
 console.log(jsonoutput);
 	
 document.getElementById("jsonscript").innerHTML = jsonoutput;
-document.getElementById("maptitle").innerHTML = document.getElementById("titletext").value;
-document.getElementById("title").innerHTML = document.getElementById("titletext").value;
+document.getElementById("realtitle").innerHTML = document.getElementById("titletext").value;
 document.getElementById("admin").style.display = "none";
 
 	    

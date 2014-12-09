@@ -176,19 +176,22 @@ function radar(id, data) {
         else return 'rotate(' + (90 + d.quadrant * text_angle + (text_angle/2) )+ ')'; } )
 
 
-      //.text(function(d) { return d.name; })
-      .html(function(d) {
-        var words = d.name.split(" ");
-        var wordcount = words.length;
-        var sentence = "";
-        var dy = "";
-        for (i = 0; i < words.length; i++) { 
-          if (d.quadrant * text_angle < 180) dy = horizonWidth / 7 * 6 - 50; else dy = 0-horizonWidth / 7 * 6 + 30;
-          dy = dy + (10 * i);
-          sentence += "<tspan text-anchor='middle' x=0 y=" + dy + ">" + words[i] + "</tspan>";
+    .each(function(d) {
+        // split name by space and -
+        var n = d.name.replace("-","- ").split(" ");
+        // get the current element
+        var text = d3.select(this)
+        // now loop
+        for (var i = 0; i < n.length; i++) {
+
+          if (d.quadrant * text_angle < 180) var dy = horizonWidth / 7 * 6 - 50; else dy = 0-horizonWidth / 7 * 6 + 30;
+            text.append("tspan")
+                .attr('x', 0)
+                .attr('y', dy + (10 * i))
+                .text(n[i])
         }
-        return sentence;
-      });
+    });
+
 
 //Main Quadrant
     if(data.quadrants.length > 1) {
@@ -304,22 +307,22 @@ function radar(id, data) {
     add_quadrants(base);
     
     var blip_data = process_radar_data(data);
-    // blip_data.sort(
-    //   function (a,b) {
-    //     if (a.superquad < b.superquad)
-    //       return -1;
-    //     if (a.superquad > b.superquad)
-    //       return 1;
-    //     if (a.quadrant < b.quadrant)
-    //       return -1;
-    //     if (a.quadrant > b.quadrant)
-    //       return 1;
-    //     if (a.name < b.name)
-    //       return -1;
-    //     if (a.name > b.name)
-    //       return 1;
-    //     return 0;
-    //   });
+    blip_data.sort(
+       function (a,b) {
+         if (a.superquad < b.superquad)
+           return -1;
+         if (a.superquad > b.superquad)
+           return 1;
+         if (a.quadrant < b.quadrant)
+           return -1;
+         if (a.quadrant > b.quadrant)
+           return 1;
+         if (a.name < b.name)
+           return -1;
+         if (a.name > b.name)
+           return 1;
+         return 0;
+       });
 
         
 
@@ -405,7 +408,7 @@ var coordinates = [[0.5,0.07],
       .append('tr')
       .html(function(d) { 
         var cellcolour = ["#D62728","#FF7F0E","#2CA02C","#E377C2","#1F77B4"];
-        return "<td>" + d.superquad + "</td><td>" + d.quadrant + "</td><td bgcolor=" + cellcolour[d.stage - 1] + " style='opacity:0.5'>" + d.name + d.stage + "</td>"; });
+        return "<td>" + d.superquad + "</td><td>" + d.quadrant + "</td><td bgcolor=" + cellcolour[d.stage - 1] + " style='opacity:0.5'>" + d.name + "</td>"; });
 
     
   }  
