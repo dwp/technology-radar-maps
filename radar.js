@@ -185,6 +185,8 @@ function radar(id, data) {
         for (var i = 0; i < n.length; i++) {
 
           if (d.quadrant * text_angle < 180) var dy = horizonWidth / 7 * 6 - 50; else dy = 0-horizonWidth / 7 * 6 + 30;
+
+
             text.append("tspan")
                 .attr('x', 0)
                 .attr('y', dy + (10 * i))
