@@ -17,7 +17,10 @@ h1 {
 	text-align: center;
 	font-family: Arial, Sans-serif;
 }
-
+h2 {
+	text-align: center;
+	font-family: Arial, Sans-serif;
+}
 table {
     font-family: Arial, Sans-serif;
     border-collapse: collapse;
@@ -52,7 +55,7 @@ svg text.quadrant {
 	font-family: Arial, Sans-serif; 
 	color: white; 
 	opacity: 1; 
-	font-size: 10px;
+	font-size: 12px;
 	text-align: center;
 }
 
@@ -74,13 +77,14 @@ svg text.name { font-family: Arial, Sans-serif; font-size: 12px; opacity: 0.8 }
 <body>
 	<center>
 	<h2 id="realtitle">Technology Radar Map</h2>
+	<div id="date"></div>
 	<div id="admin">
 		<p>Title: <input type="text" name="titletext" id="titletext" /></p>
 		Select a file: <input type="file" name="xlfile" id="xlf"/>
 	</div>
 </center>
-
-<pre id="outter" style="display:none"></pre>
+	<div id="details" style="position:fixed; top:30px; left:30px; width:150px; background-color:#fff;"></div>
+<pre id="outter" style="display:none;"></pre>
 <center><table width='300px'>
 	<tr>
 		<th>Assess</th><th>Trial</th><th>Deploy</th><th>Sunset</th><th>Decommission</th>
@@ -94,10 +98,10 @@ svg text.name { font-family: Arial, Sans-serif; font-size: 12px; opacity: 0.8 }
 	</tr>
 </table></center>
 
-<center><div id="radar" style="width: 1664px; height: 1664px;"></div></center>
+<center><div id="radar" ></div></center>
 <script>
 
-function entry(start, end, quadrant, superquad, position, position_angle, status, stage) {
+function entry(start, end, quadrant, superquad, position, position_angle, status, stage, description, link) {
 	return { 
 		// start date that this entry applies for
 		start: start,
@@ -114,7 +118,11 @@ function entry(start, end, quadrant, superquad, position, position_angle, status
 		// which superquadrant the blip is in for the table
 		status: status,
 		// which stage the blip is in e.g., access
-		stage: stage
+		stage: stage,
+		// which stage the blip is in e.g., access
+		description: description,
+		// which stage the blip is in e.g., access
+		link: link
 
 	};
 }
@@ -199,7 +207,7 @@ function process_wb(wb) {
 
 	if(outter.innerText === undefined) outter.textContent = output;
 	else outter.innerText = output;
-	if(typeof console !== 'undefined') console.log("output", new Date());
+	if(typeof console !== 'undefined');
 
 			var jsondata = [];
 			var jsonquadrants = [];
@@ -241,9 +249,9 @@ function process_wb(wb) {
    				
 			jsondata += '{ name: "'+ parsejson.radar[i].Technology + '",' + 
 				'description: "'+ parsejson.radar[i].Description + '",' +
-				'links: [""],' +
+				'link: "'+ parsejson.radar[i].Link + '",' +
 				'history: [' +
-					'entry(null,null,"' + parsejson.radar[i].Area + '","' + parsejson.radar[i].Domain + '", 0.14, 0.1,' + parsejson.radar[i].Status + ',';
+					'entry("' + parsejson.radar[i].Start + '","' + parsejson.radar[i].End + '","' + parsejson.radar[i].Area + '","' + parsejson.radar[i].Domain + '", 0.14, 0.1,' + parsejson.radar[i].Status + ',';
 
 					if (parsejson.radar[i].Progress === 'Assess') jsondata += 5;
 					if (parsejson.radar[i].Progress === 'Trial') jsondata += 4;
@@ -256,25 +264,27 @@ function process_wb(wb) {
 
 			}
 			jsondata = jsondata.substr(0, jsondata.length-2); 
-			jsondata += "\n"
+			jsondata += "\n";
+			if (i<20) {var size = 800}; if (i<50) {var size = 1024}; if (i>50) {var size = 1600};
 
 var jsonoutput = 'radar("#radar",'  + "\n" +
 '{ horizons: [ "decommision", "sunset", "deploy", "trial", "assess","subcategory","maincategory" ],'  + "\n" +
 	'quadrants: [' + jsonquadrantsstring + '],'  + "\n" +
 	'sub_quadrants : { ' + jsonsubquadrantsstring + ' },'  + "\n" +
-	'width: 1664,'  + "\n" +
-	'height: 1664, '  + "\n" +
+	'width: ' + size + ','  + "\n" +
+	'height: ' + size + ', '  + "\n" +
 	'data: [' +
 			jsondata;
 
 jsonoutput +=']});';
-
 
 console.log(jsonoutput);
 	
 document.getElementById("jsonscript").innerHTML = jsonoutput;
 document.getElementById("realtitle").innerHTML = document.getElementById("titletext").value;
 document.getElementById("title").innerHTML = document.getElementById("titletext").value;
+var da = new Date();
+document.getElementById("date").innerHTML = "Created: " + da.toDateString();
 document.getElementById("admin").style.display = "none";
 
 	    

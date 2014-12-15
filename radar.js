@@ -37,9 +37,7 @@ function radar(id, data) {
     var results = [];
     for (var i in data.data) {
       var entry = data.data[i];
-      var history = entry.history.filter(function(e) {
-        return (e.end == null || (e.end > currentTime && e.start < currentTime));
-      })[0];
+      var history = entry.history[0];
       
       var quadrant_delta = 0;
 
@@ -61,6 +59,10 @@ function radar(id, data) {
         stage: history.stage,
         quad_delta: quadrant_delta,
         status: history.status,
+        description: entry.description,
+        link: entry.link,
+        start: history.start,
+        end: history.end,
         count: 1
       };
 
@@ -169,7 +171,6 @@ function radar(id, data) {
       .enter()
       .append('text')
       .attr('class','quadrant wrapping')
-      //.attr('dy', function(d) { if (d.quadrant * text_angle < 180) return horizonWidth / 7 * 6 - 30; else return 0-horizonWidth / 7 * 6 + 30; } )
       .attr('text-anchor', 'middle')
       .attr('transform', function(d) { if (d.quadrant * text_angle < 180) 
         return 'rotate(' + (-90 + d.quadrant * text_angle + (text_angle/2) )+ ')' ; 
@@ -189,7 +190,7 @@ function radar(id, data) {
 
             text.append("tspan")
                 .attr('x', 0)
-                .attr('y', dy + (10 * i))
+                .attr('y', dy + (12 * i))
                 .text(n[i])
         }
     });
@@ -293,8 +294,6 @@ function radar(id, data) {
       .append('path')
       .attr('d', arc_function)
       .attr('fill', function(d,i) { 
-       // var rgb = d3.rgb(color_scale(d.quadrant)); console.log(rgb);
-        //return rgb.brighter(d.horizon/data.horizons.length * 3);
         return d3.rgb(color_scale(i));
       })
       .attr('class', quadrant_class);
@@ -326,7 +325,6 @@ function radar(id, data) {
          return 0;
        });
 
-        
 
     var blips = base.selectAll('.blip')
       .data(blip_data)
@@ -343,11 +341,12 @@ function radar(id, data) {
             for (i = 0; i < l; i++) { 
               if (blip_data[i].quadrant == d.quadrant && blip_data[i].stage == d.stage)
               ctr += blip_data[i].count;
+
           }
             for (i = 0; i < l; i++) { 
               if (blip_data[i].quadrant == d.quadrant && blip_data[i].stage == d.stage)
               currentctr += blip_data[i].count;
-            if (blip_data[i].name == d.name) { break; }
+            if (blip_data[i].id == d.id) { break; }
           }
 
 var coordinates = [[0.5,0.07],
@@ -372,26 +371,45 @@ var coordinates = [[0.5,0.07],
 
       var theta = (position_angle * quad_angle) + d.quad_delta;
       var r = position * horizonWidth;
-      var cart = polar_to_cartesian(r, theta)
+      var cart = polar_to_cartesian(r, theta);
 
         return "translate(" + (cart[0]) + "," + (cart[1]) + ")"; })
       .on('mouseover', function(d){
         d3.select(this).select("text.name").style({opacity:'1.0'});
         d3.select(this).select("circle").style({fill:'white'});
+        var detail = '<h2>' + d.name + '</h2>';
+        if(d.description != "undefined") { detail += '<p>' + d.description + '</p>';}
+        if(d.start != "undefined") { detail += '<p>Started: ' + d.start + '</p>';}
+        if(d.end != "undefined") { detail += '<p>Due to end: ' + d.end + '</p>';}
+        if(d.link != "undefined") { detail += '<p>Click for more info</p>';}
+        document.getElementById("details").innerHTML = detail;
+        document.getElementById("details").style.padding = "30px";
+
       })
       .on('mouseout', function(d){
         d3.select(this).select("text.name").style({opacity:'0.1'});
         d3.select(this).select("circle").style({fill:'black'});
-        if (d.status == '1') return d3.select(this).select("circle").style({fill:'grey'})
+        document.getElementById("details").style.padding = 0;
+        document.getElementById("details").innerHTML = "";
+        if (d.status == '1') return d3.select(this).select("circle").style({fill:'grey'});
+        var today = new Date();
+        var enddate = new Date(Date.parse(d.end));
+        if(today > enddate) return d3.select(this).select("circle").style({fill:'red'});
+
       })
-      .on('dblclick', function(d){
-        d3.select(this).select("circle").style({fill:'white'});
+      .on('click', function(d){
+        if(d.link != "undefined") { window.open('http://' + d.link); }
       })      
-    
+
       
     blips.append('circle')
     .attr('r', '4px')
-    .attr('fill', function(d) { if (d.status == '1') return "grey"; if (d.status == null) return "black"; if (d.status == '0') return "black"; })
+    .attr('fill', function(d) {
+      var today = new Date();
+      var enddate = new Date(Date.parse(d.end));
+      if(today > enddate)  return "red";
+      else { if (d.status == '1') return "grey"; if (d.status == null) return "black"; if (d.status == '0') return "black";  }
+      })
     ;
     
     blips.append("text")
