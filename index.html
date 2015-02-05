@@ -77,243 +77,244 @@ svg text.name { font-family: Arial, Sans-serif; font-size: 12px; opacity: 0.8 }
 </head>
 <body>
 	<center>
-	<h2 id="realtitle">Technology Radar Map</h2>
-	<div id="date"></div>
-	<div id="admin">
-		<p>Title: <input type="text" name="titletext" id="titletext" /></p>
-		Select a file: <input type="file" name="xlfile" id="xlf"/>
-	</div>
-</center>
+		<h2 id="realtitle">Technology Radar Map</h2>
+		<div id="date"></div>
+		<div id="admin">
+			<p>Title: <input type="text" name="titletext" id="titletext" /></p>
+			Select a file: <input type="file" name="xlfile" id="xlf"/>
+		</div>
+	</center>
 	<div id="details" style="position:fixed; top:30px; left:30px; width:150px; background-color:#fff; border-radius: 15px;"></div>
-<pre id="outter" style="display:none;"></pre>
-<center><table width='300px'>
-	<tr>
-		<th>Assess</th><th>Trial</th><th>Deploy</th><th>Sunset</th><th>Decommission</th>
-	</tr>
-	<tr height="20px">
-		<td style="background-color:#1F77B4; opacity:0.5"></td>
-		<td style="background-color:#E377C2; opacity:0.5"></td>
-		<td style="background-color:#2CA02C; opacity:0.5"></td>
-		<td style="background-color:#FF7F0E; opacity:0.5"></td>
-		<td style="background-color:#D62728; opacity:0.5"></td>
-	</tr>
-</table></center>
+	<pre id="outter" style="display:none;"></pre>
+	<center>
+		<table width='300px'>
+			<tr>
+				<th>Assess</th><th>Trial</th><th>Deploy</th><th>Sunset</th><th>Decommission</th>
+			</tr>
+			<tr height="20px">
+				<td style="background-color:#1F77B4; opacity:0.5"></td>
+				<td style="background-color:#E377C2; opacity:0.5"></td>
+				<td style="background-color:#2CA02C; opacity:0.5"></td>
+				<td style="background-color:#FF7F0E; opacity:0.5"></td>
+				<td style="background-color:#D62728; opacity:0.5"></td>
+			</tr>
+		</table>
+	</center>
 
-<center><div id="radar" ></div></center>
-<script>
+	<center>
+		<div id="radar" ></div>
+	</center>
+	<script>
 
-function entry(start, end, quadrant, superquad, position, position_angle, status, stage, description, link) {
-	return { 
-		// start date that this entry applies for
-		start: start,
-		// end date for the entry 
-		end: end,
-		// the quadrant label
-		quadrant: quadrant,
-		// position is within the total of horizons.
-		superquad: superquad,	
-		// whether red or black dot - 0 black - 1 red
-		position: position,
-		// angles are fractions of pi/2 (ie of a quadrant)
-		position_angle: position_angle,
-		// which superquadrant the blip is in for the table
-		status: status,
-		// which stage the blip is in e.g., access
-		stage: stage,
-		// which stage the blip is in e.g., access
-		description: description,
-		// which stage the blip is in e.g., access
-		link: link
+	function entry(start, end, quadrant, superquad, position, position_angle, status, stage, description, link) {
+		return { 
+			// start date that this entry applies for
+			start: start,
+			// end date for the entry 
+			end: end,
+			// the quadrant label
+			quadrant: quadrant,
+			// position is within the total of horizons.
+			superquad: superquad,	
+			// whether red or black dot - 0 black - 1 red
+			position: position,
+			// angles are fractions of pi/2 (ie of a quadrant)
+			position_angle: position_angle,
+			// which superquadrant the blip is in for the table
+			status: status,
+			// which stage the blip is in e.g., access
+			stage: stage,
+			// which stage the blip is in e.g., access
+			description: description,
+			// which stage the blip is in e.g., access
+			link: link
 
-	};
-}
+		};
+	}
 
-</script>
-<script id='jsonscript'></script>
-<br />
-<!-- uncomment the next line here and in xlsxworker.js for encoding support -->
-<!--<script src="dist/cpexcel.js"></script>-->
-<script src="shim.js"></script>
-<script src="jszip.js"></script>
-<script src="xlsx.js"></script>
-<!-- uncomment the next line here and in xlsxworker.js for ODS support -->
-<script src="ods.js"></script>
-<script>
-
-
-var wtf_mode = false;
-
-function fixdata(data) {
-	var o = "", l = 0, w = 10240;
-	for(; l<data.byteLength/w; ++l) o+=String.fromCharCode.apply(null,new Uint8Array(data.slice(l*w,l*w+w)));
-	o+=String.fromCharCode.apply(null, new Uint8Array(data.slice(l*w)));
-	return o;
-}
-
-function ab2str(data) {
-	var o = "", l = 0, w = 10240;
-	for(; l<data.byteLength/w; ++l) o+=String.fromCharCode.apply(null,new Uint16Array(data.slice(l*w,l*w+w)));
-	o+=String.fromCharCode.apply(null, new Uint16Array(data.slice(l*w)));
-	return o;
-}
-
-function s2ab(s) {
-	var b = new ArrayBuffer(s.length*2), v = new Uint16Array(b);
-	for (var i=0; i != s.length; ++i) v[i] = s.charCodeAt(i);
-	return [v, b];
-}
-
-function xlsxworker_noxfer(data, cb) {
-	var worker = new Worker('./xlsxworker.js');
-	worker.onmessage = function(e) {
-		switch(e.data.t) {
-			case 'ready': break;
-			case 'e': console.error(e.data.d); break;
-			case 'xlsx': cb(JSON.parse(e.data.d)); break;
-		}
-	};
-	var arr = rABS ? data : btoa(fixdata(data));
-	worker.postMessage({d:arr,b:rABS});
-}
-
-function xlsxworker_xfer(data, cb) {
-	var worker = new Worker(rABS ? './xlsxworker2.js' : './xlsxworker1.js');
-	worker.onmessage = function(e) {
-		switch(e.data.t) {
-			case 'ready': break;
-			case 'e': console.error(e.data.d); break;
-			default: xx=ab2str(e.data).replace(/\n/g,"\\n").replace(/\r/g,"\\r"); console.log("done"); cb(JSON.parse(xx)); break;
-		}
-	};
-
-		worker.postMessage(data, [data]);
-}
+	</script>
+	<script id='jsonscript'></script>
+	<br />
+	<script src="shim.js"></script>
+	<script src="jszip.js"></script>
+	<script src="xlsx.js"></script>
+	<script src="ods.js"></script>
+	<script>
 
 
+	var wtf_mode = false;
 
-function to_json(workbook) {
-	var result = {};
-	workbook.SheetNames.forEach(function(sheetName) {
-		var roa = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
-		if(roa.length > 0){
-			result[sheetName] = roa;
-		}
-	});
-	return result;
-}
+	function fixdata(data) {
+		var o = "", l = 0, w = 10240;
+		for(; l<data.byteLength/w; ++l) o+=String.fromCharCode.apply(null,new Uint8Array(data.slice(l*w,l*w+w)));
+		o+=String.fromCharCode.apply(null, new Uint8Array(data.slice(l*w)));
+		return o;
+	}
 
+	function ab2str(data) {
+		var o = "", l = 0, w = 10240;
+		for(; l<data.byteLength/w; ++l) o+=String.fromCharCode.apply(null,new Uint16Array(data.slice(l*w,l*w+w)));
+		o+=String.fromCharCode.apply(null, new Uint16Array(data.slice(l*w)));
+		return o;
+	}
 
-function process_wb(wb) {
-	var output = JSON.stringify(to_json(wb), 2, 2);;
+	function s2ab(s) {
+		var b = new ArrayBuffer(s.length*2), v = new Uint16Array(b);
+		for (var i=0; i != s.length; ++i) v[i] = s.charCodeAt(i);
+		return [v, b];
+	}
 
-	if(outter.innerText === undefined) outter.textContent = output;
-	else outter.innerText = output;
-	if(typeof console !== 'undefined');
-
-			var jsondata = [];
-			var jsonquadrants = [];
-			var jsonquadrantsstring = "";
-			var jsonsubquadrants = [];
-			var jsonsubquadrantsstring = "";
-			var jsonsubquadrantsarray = [];
-			var parsejson = JSON.parse(output);
-
-			for (i = 0; i < parsejson.radar.length; i++) { 
-   				 if (jsonquadrants.indexOf(parsejson.radar[i].Domain) === -1) {
-   				 	jsonquadrants.push(parsejson.radar[i].Domain);
-   				 	jsonquadrantsstring += '"' + parsejson.radar[i].Domain + '",';}
-
+	function xlsxworker_noxfer(data, cb) {
+		var worker = new Worker('./xlsxworker.js');
+		worker.onmessage = function(e) {
+			switch(e.data.t) {
+				case 'ready': break;
+				case 'e': console.error(e.data.d); break;
+				case 'xlsx': cb(JSON.parse(e.data.d)); break;
 			}
-			jsonquadrantsstring = jsonquadrantsstring.substr(0, jsonquadrantsstring.length-1); 
+		};
+		var arr = rABS ? data : btoa(fixdata(data));
+		worker.postMessage({d:arr,b:rABS});
+	}
+
+	function xlsxworker_xfer(data, cb) {
+		var worker = new Worker(rABS ? './xlsxworker2.js' : './xlsxworker1.js');
+		worker.onmessage = function(e) {
+			switch(e.data.t) {
+				case 'ready': break;
+				case 'e': console.error(e.data.d); break;
+				default: xx=ab2str(e.data).replace(/\n/g,"\\n").replace(/\r/g,"\\r"); console.log("done"); cb(JSON.parse(xx)); break;
+			}
+		};
+
+			worker.postMessage(data, [data]);
+	}
 
 
-			for (i = 0; i < jsonquadrants.length; i++) { 
-				jsonsubquadrantsstring += '"' + jsonquadrants[i] + '"  : [';
-					for (j = 0; j < parsejson.radar.length; j++) {
-						if (jsonquadrants[i] == parsejson.radar[j].Domain && jsonsubquadrants.indexOf(parsejson.radar[j].Area) === -1) {
-						jsonsubquadrants.push(parsejson.radar[j].Area);
-   				 		jsonsubquadrantsstring += '"' + parsejson.radar[j].Area + '",';
+
+	function to_json(workbook) {
+		var result = {};
+		workbook.SheetNames.forEach(function(sheetName) {
+			var roa = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
+			if(roa.length > 0){
+				result[sheetName] = roa;
+			}
+		});
+		return result;
+	}
+
+
+	function process_wb(wb) {
+		var output = JSON.stringify(to_json(wb), 2, 2);;
+
+		if(outter.innerText === undefined) outter.textContent = output;
+		else outter.innerText = output;
+		if(typeof console !== 'undefined');
+
+				var jsondata = [];
+				var jsonquadrants = [];
+				var jsonquadrantsstring = "";
+				var jsonsubquadrants = [];
+				var jsonsubquadrantsstring = "";
+				var jsonsubquadrantsarray = [];
+				var parsejson = JSON.parse(output);
+
+				for (i = 0; i < parsejson.radar.length; i++) { 
+	   				 if (jsonquadrants.indexOf(parsejson.radar[i].Domain) === -1) {
+	   				 	jsonquadrants.push(parsejson.radar[i].Domain);
+	   				 	jsonquadrantsstring += '"' + parsejson.radar[i].Domain + '",';}
+
+				}
+				jsonquadrantsstring = jsonquadrantsstring.substr(0, jsonquadrantsstring.length-1); 
+
+
+				for (i = 0; i < jsonquadrants.length; i++) { 
+					jsonsubquadrantsstring += '"' + jsonquadrants[i] + '"  : [';
+						for (j = 0; j < parsejson.radar.length; j++) {
+							if (jsonquadrants[i] == parsejson.radar[j].Domain && jsonsubquadrants.indexOf(parsejson.radar[j].Area) === -1) {
+							jsonsubquadrants.push(parsejson.radar[j].Area);
+	   				 		jsonsubquadrantsstring += '"' + parsejson.radar[j].Area + '",';
+
+							}
 
 						}
 
-					}
+					jsonsubquadrantsstring = jsonsubquadrantsstring.substr(0, jsonsubquadrantsstring.length-1); 
 
+					jsonsubquadrantsstring += '],';
+
+				}
 				jsonsubquadrantsstring = jsonsubquadrantsstring.substr(0, jsonsubquadrantsstring.length-1); 
 
-				jsonsubquadrantsstring += '],';
 
-			}
-			jsonsubquadrantsstring = jsonsubquadrantsstring.substr(0, jsonsubquadrantsstring.length-1); 
+				for (i = 0; i < parsejson.radar.length; i++) { 
+	   				
+				jsondata += '{ name: "'+ parsejson.radar[i].Technology + '",' + 
+					'description: "'+ parsejson.radar[i].Description + '",' +
+					'link: "'+ parsejson.radar[i].Link + '",' +
+					'history: [' +
+						'entry("' + parsejson.radar[i].Start + '","' + parsejson.radar[i].End + '","' + parsejson.radar[i].Area + '","' + parsejson.radar[i].Domain + '", 0.14, 0.1,' + parsejson.radar[i].Status + ',';
 
+						if (parsejson.radar[i].Progress === 'Assess') jsondata += 5;
+						if (parsejson.radar[i].Progress === 'Trial') jsondata += 4;
+						if (parsejson.radar[i].Progress === 'Deploy') jsondata += 3;
+						if (parsejson.radar[i].Progress === 'Sunset') jsondata += 2;
+						if (parsejson.radar[i].Progress === 'Decommission') jsondata += 1;
 
-			for (i = 0; i < parsejson.radar.length; i++) { 
-   				
-			jsondata += '{ name: "'+ parsejson.radar[i].Technology + '",' + 
-				'description: "'+ parsejson.radar[i].Description + '",' +
-				'link: "'+ parsejson.radar[i].Link + '",' +
-				'history: [' +
-					'entry("' + parsejson.radar[i].Start + '","' + parsejson.radar[i].End + '","' + parsejson.radar[i].Area + '","' + parsejson.radar[i].Domain + '", 0.14, 0.1,' + parsejson.radar[i].Status + ',';
+						jsondata += ')' +
+					']},' + "\n";
 
-					if (parsejson.radar[i].Progress === 'Assess') jsondata += 5;
-					if (parsejson.radar[i].Progress === 'Trial') jsondata += 4;
-					if (parsejson.radar[i].Progress === 'Deploy') jsondata += 3;
-					if (parsejson.radar[i].Progress === 'Sunset') jsondata += 2;
-					if (parsejson.radar[i].Progress === 'Decommission') jsondata += 1;
+				}
+				jsondata = jsondata.substr(0, jsondata.length-2); 
+				jsondata += "\n";
+				if (i<20) {var size = 800}; if (i<50) {var size = 1024}; if (i>50) {var size = 1600};
 
-					jsondata += ')' +
-				']},' + "\n";
+	var jsonoutput = 'radar("#radar",'  + "\n" +
+	'{ horizons: [ "decommision", "sunset", "deploy", "trial", "assess","subcategory","maincategory" ],'  + "\n" +
+		'quadrants: [' + jsonquadrantsstring + '],'  + "\n" +
+		'sub_quadrants : { ' + jsonsubquadrantsstring + ' },'  + "\n" +
+		'width: ' + size + ','  + "\n" +
+		'height: ' + size + ', '  + "\n" +
+		'data: [' +
+				jsondata;
 
-			}
-			jsondata = jsondata.substr(0, jsondata.length-2); 
-			jsondata += "\n";
-			if (i<20) {var size = 800}; if (i<50) {var size = 1024}; if (i>50) {var size = 1600};
+	jsonoutput +=']});';
 
-var jsonoutput = 'radar("#radar",'  + "\n" +
-'{ horizons: [ "decommision", "sunset", "deploy", "trial", "assess","subcategory","maincategory" ],'  + "\n" +
-	'quadrants: [' + jsonquadrantsstring + '],'  + "\n" +
-	'sub_quadrants : { ' + jsonsubquadrantsstring + ' },'  + "\n" +
-	'width: ' + size + ','  + "\n" +
-	'height: ' + size + ', '  + "\n" +
-	'data: [' +
-			jsondata;
+	console.log(jsonoutput);
+		
+	document.getElementById("jsonscript").innerHTML = jsonoutput;
+	document.getElementById("realtitle").innerHTML = document.getElementById("titletext").value;
+	document.getElementById("title").innerHTML = document.getElementById("titletext").value;
+	var da = new Date();
+	document.getElementById("date").innerHTML = "Created: " + da.toDateString();
+	document.getElementById("admin").style.display = "none";
 
-jsonoutput +=']});';
-
-console.log(jsonoutput);
-	
-document.getElementById("jsonscript").innerHTML = jsonoutput;
-document.getElementById("realtitle").innerHTML = document.getElementById("titletext").value;
-document.getElementById("title").innerHTML = document.getElementById("titletext").value;
-var da = new Date();
-document.getElementById("date").innerHTML = "Created: " + da.toDateString();
-document.getElementById("admin").style.display = "none";
-
-	    
-}
-
-var xlf = document.getElementById('xlf');
-function handleFile(e) {
-	var files = e.target.files;
-	var i,f;
-	for (i = 0, f = files[i]; i != files.length; ++i) {
-		var reader = new FileReader();
-		var name = f.name;
-		reader.onload = function(e) {
-			var data = e.target.result;
-			
-
-				var arr = fixdata(data);
-					wb = XLSX.read(btoa(arr), {type: 'base64'});
-				
-				process_wb(wb);
-			
-		};
-		reader.readAsArrayBuffer(f);
+		    
 	}
-}
 
-if(xlf.addEventListener) xlf.addEventListener('change', handleFile, false);
-</script>
+	var xlf = document.getElementById('xlf');
+	function handleFile(e) {
+		var files = e.target.files;
+		var i,f;
+		for (i = 0, f = files[i]; i != files.length; ++i) {
+			var reader = new FileReader();
+			var name = f.name;
+			reader.onload = function(e) {
+				var data = e.target.result;
+				
+
+					var arr = fixdata(data);
+						wb = XLSX.read(btoa(arr), {type: 'base64'});
+					
+					process_wb(wb);
+				
+			};
+			reader.readAsArrayBuffer(f);
+		}
+	}
+
+	if(xlf.addEventListener) xlf.addEventListener('change', handleFile, false);
+	</script>
 
 </body>
 </html>
